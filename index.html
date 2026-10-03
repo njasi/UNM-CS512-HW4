@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>UNM CS 512 HW4: Hierarchal modeling</title>
+    <title>UNM CS 512 HW4: Hierarchal Modeling, BVH loader</title>
     <!-- load styles from the main site if we online -->
     <link href="./public/styles.css" rel="stylesheet" />
     <link href="./public/hw4.css" rel="stylesheet" />
@@ -11,7 +11,58 @@
 
   <body>
     <main>
-      <h1>HW4: Hierarchal modeling</h1>
+      <h1>HW4: Hierarchal Modeling, BVH Loader</h1>
+      <div class="sourcecode">
+        <a href="https://github.com/njasi/UNM-CS512-HW4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-github"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"
+            />
+          </svg>
+          Homework 4 Source
+        </a>
+
+        <a
+          href="https://github.com/njasi/UNM-CS512-PotatoEngine/tree/ce60e607b624090f7a64db614dd561ca7f2b106f"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-github"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"
+            />
+          </svg>
+          PotatoEngine Source (at time of HW4 completion)
+        </a>
+      </div>
+      <p>
+        In this assignment I decided to do some research on animation file
+        formats. which lead me to the
+        <a href="https://en.wikipedia.org/wiki/Biovision_Hierarchy"
+          >BioVision Hierarchy (.bvh) file format</a
+        >. The BVH format largely is used for recording motion capturing
+        information and porting over to various media. I believe it's used
+        sometimes in robotics to define movement in complex structures as well.
+        Here is a
+        <a
+          href="https://research.cs.wisc.edu/graphics/Courses/cs-838-1999/Jeff/BVH.html"
+          >good overview of the format</a
+        >
+        I used while designing my loader, although it is not fully correct (or
+        rather up to date).
+      </p>
       <div id="demo">
         <div style="display: flex; justify-content: center">
           <canvas id="glcanvas" width="800" height="450"></canvas>
@@ -50,37 +101,38 @@
           </label>
         </div>
       </div>
+
+      <p>Controls and some things to try:</p>
+      <ul>
+        <li>
+          Rotate the scene with your mouse and move with WS + the arrow keys.
+        </li>
+        <li>Control the animation with the inputs below the frame.</li>
+        <li>Try turning off interpolation at low speeds to see frame jumps.</li>
+      </ul>
       <article>
+        <h2>Where are these animations from?</h2>
         <p>
-          In this assignment I decided to do some research on animation file
-          formats. This lead me to the
-          <a href="https://en.wikipedia.org/wiki/Biovision_Hierarchy"
-            >BioVision Hierarchy (.bvh) file format</a
-          >. Overall it consists of two sections, a definition of joint points
-          and a set of animation frames. The BVH format largely is used for
-          recording motion capturing information and porting over to various
-          media. I believe it's used sometimes in robotics to define movement in
-          complex structures as well. Here is a
-          <a
-            href="https://research.cs.wisc.edu/graphics/Courses/cs-838-1999/Jeff/BVH.html"
-            >good overview of the format</a
-          >
-          I used while designing my loader, although it is not fully correct.
-          The BVH files I'm using here are from the
+          The BVH files I'm using in this demo are from the open source
           <a
             href="https://github.com/BandaiNamcoResearchInc/Bandai-Namco-Research-Motiondataset"
-            >Bandai-Namco-Research-Motiondataset on github</a
+            >Bandai-Namco-Research-Motiondataset repository on github</a
           >. Additionally you can read the related paper "<a
             href="https://arxiv.org/abs/2306.08861"
             >Motion Capture Dataset for Practical Use of AI-based Motion Editing
             and Stylization</a
           >" Kobayashi et al. (2023).
         </p>
+        <h2>So how do you parse BVH files?</h2>
+        <p>
+          Overall the BVH format is plain ASCII text and consists of two
+          sections, a definition of joint points and a set of animation frames.
+        </p>
+        <h3>Joints</h3>
         <p>
           The joint or <code>HIEARCHY</code> section consists of nested joint
           definitions which define various properties:
         </p>
-
         <ul>
           <li>
             The type of joint (<code>ROOT</code> or <code>JOINT</code>) and its
@@ -165,14 +217,14 @@ ROOT joint_Root
           capture data is collected. On the other hand the green skeleton is in
           a more realistic pose, and to achieve this I've simply allowed it
           about one frame of animation (from the <code>MOTION</code> data we we
-          look at next) to get into place. Some BVH files will have a skeleton
-          start in a realistic pose but this is not always the case as seen
-          here.
+          look at next) to get it into place. Some BVH files will have a
+          skeleton start in a realistic pose but this is not always the case as
+          seen here.
         </p>
         <div style="display: flex; justify-content: center">
           <canvas id="bonecanvas" width="800" height="450"></canvas>
         </div>
-
+        <h3>Animation</h3>
         <p>
           After the <code>HIERARCHY</code> section there is the
           <code>MOTION</code> section which details the animation of the joints.
@@ -200,6 +252,7 @@ Frame Time:	0.0333333
       </pre
         >
 
+        <h3>Conclusion / Notes</h3>
         <p>
           Now properly parse these two parts and you can load most BVH files.
           Overall, this format is relatively simple to parse since it is plain
@@ -215,6 +268,8 @@ Frame Time:	0.0333333
           actual geometry to the models would be complex but it was a
           interesting exercise regardless.
         </p>
+        <h2>Why?</h2>
+        <p>It was interesting...</p>
       </article>
     </main>
   </body>

@@ -7,6 +7,18 @@ canvas {
   width: 100%;
 }
 
+.sourcecode {
+  display: flex;
+  gap: 1rem;
+}
+
+.sourcecode a {
+  gap: 0.25rem;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -40,7 +52,7 @@ canvas {
   border: 1px solid var(--accent);
   border-radius: 4px;
   background: var(--surface);
-  color:var(--accent);
+  color: var(--accent);
 }
 
 .controls input:focus,
