@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>UNM CS 512 HW4: Hierarchal modeling</title>
+    <!-- load styles from the main site if we online -->
+    <link href="./public/styles.css" rel="stylesheet" />
+    <script defer src="./dist/bundle.js"></script>
+  </head>
+
+  <body>
+    <main>
+      <h1>HW4: Hierarchal modeling</h1>
+      <div style="display: flex; justify-content: center">
+        <canvas id="glcanvas" width="800" height="450"></canvas>
+      </div>
+      <p>
+        In this assignment I decided to do some research on animation file formats.
+        This lead me to the <a href="https://en.wikipedia.org/wiki/Biovision_Hierarchy">BioVision Hierarchy (.bvh) file format</a>.
+        Overall it consists of two sections, a definition of joint points and a set of animation frames. 
+        The BVH format largely is used for recording motion capturing information and porting over to various media.
+        I believe it's used sometimes in robotics to define movement in complex structures as well.
+        Here is a <a href ="https://research.cs.wisc.edu/graphics/Courses/cs-838-1999/Jeff/BVH.html">good overview of the format</a> I used while designing my loader, although it is not fully correct.
+        The BVH files I'm using here are from the <a href="https://github.com/BandaiNamcoResearchInc/Bandai-Namco-Research-Motiondataset">Bandai-Namco-Research-Motiondataset on github</a>. 
+        Additionally you can read the related paper "<a href="https://arxiv.org/abs/2306.08861">Motion Capture Dataset for Practical Use of AI-based Motion Editing
+and Stylization</a>" Kobayashi et al. (2023.)
+      </p>
+      <p>
+        The joint or <code>HIEARCHY</code> section consists of nested joint definitions which define various properties:
+        <ul>
+          <li>
+            The type of joint (<code>ROOT</code> or <code>JOINT</code>) and its name which follows the type. 
+            The next joint properties and children joints are defined within a pair of braces. 
+            There can also be multiple <code>ROOT</code> joints in a single bvh file allowing for multiple skeletons, but I ignored this in my parser.
+          </li>
+          <li>
+            The positions of joints in the <code>OFFSET</code> field which is in X, Y, Z order
+          </li>
+          <li>
+            The properties animation frames will later change, <code>CHANNELS</code>. Note that these channels can be in any order and this is the order the transformations should be applied.
+            I believe it is convention for position channels to be first and then rotation, but this doesn't seem to be required. 
+            Additionally rotation channels are conventionally in YXZ order but do not even have to be consistent within a model, joints may all have different rotation orders... 
+            This was quite a headache as I did not realize the channels would deviate from YXZ so things were quite wonky looking at first.
+          </li>
+          <li>
+            <code>End Site</code> nodes label the end of a joint branch and only contain an <code>OFFSET</code>
+          </li>
+        </ul>
+        Below is a small snippet from the <code>walk.bvh</code> file. 
+        Notice how we create the shape of the skeleton's lower body and begin the spine with multiple children joints branching off of the <code>Hips</code> joint.
+        <pre>
+HIERARCHY
+ROOT joint_Root
+{
+  OFFSET 0 0 0
+  CHANNELS 6 Xposition Yposition Zposition Zrotation Xrotation Yrotation
+  JOINT Hips
+  {
+    OFFSET 0 93.9241 -3
+    CHANNELS 6 Xposition Yposition Zposition Zrotation Xrotation Yrotation
+    JOINT Spine
+    {
+      OFFSET 15.7357 0 0
+      CHANNELS 6 Xposition Yposition Zposition Zrotation Xrotation Yrotation
+      JOINT Chest
+      {
+            ...
+            End Site
+            {
+              OFFSET 0 0 0
+            }
+            ...
+      }
+    }
+    JOINT UpperLeg_L
+    {
+      OFFSET -2.19248 -6.46944 0
+      CHANNELS 6 Xposition Yposition Zposition Zrotation Xrotation Yrotation
+      JOINT LowerLeg_L
+      {
+        ...
+      }
+    }
+    JOINT UpperLeg_R
+    {
+      ...
+    }
+  }
+}
+        </pre>
+        Once we parse this information we can create a simple skeleton by making "bones" between the joints defined as seen below. 
+        The red skeleton on the left may look malformed, but this is actually the starting position of the model in the <code>HIERARCHY</code> before any motion capture data is collected.
+        On the other hand the green skeleton on the right is in a more realistic pose, and to achieve this I've simply allowed it about one frame of animation (from the <code>MOTION</code> data we we look at next) to get into place.
+        Some BVH files will have a skeleton start in a realistic pose but this is not always the case as seen here.
+      </p>
+      
+      <div style="display: flex; justify-content: center">
+        <canvas id="bonecanvas" width="800" height="450"></canvas>
+      </div>
+
+      <p>
+        After the <code>HIERARCHY</code> section there is the <code>MOTION</code> section which details the animation of the joints. 
+        First we have some metadata, the count of frames, and the duration of a frame in seconds.
+        Next we have the actual animation information in the form of many lines of numbers. 
+        These numbers correspond directly to the <code>CHANNELS</code> we previously encountered on the joint definitions.
+        The numbers are matched to a channel by order of occurrence if you were to traverse the joints depth first.
+        The transformations themselves are meant to be done in the local space of the object, not the world space, so our shiny new hierarchical model setup is very suitable for running the animation data.
+      </p>
+      <p>
+        Below is a small snippet from the <code>walk.bvh</code> file which includes 3 frames of animation.
+      </p>
+      <pre>
+MOTION
+Frames:	268
+Frame Time:	0.0333333
+0 0 0 0 0 -0 0.959454 90.2936 -449.181 87.094 -4.94869 1.62257 15.7357 5.1072e-06 -5.51764e-07 129.124 86.8712 -128.344 8.98455 -0.406207 -4.3199e-07 -2.94051 3.87408 1.66051 16.3773 -1.3905e-06 -6.99897e-07 -1.8675 1.01855 -1.01557 6.45672 -1.25837e-06 -1.02172e-07 12.7673 -2.02074 -1.38811 12.9942 -0.242716 4.98039 -89.8756 -1.84588 -101.145 5.34809 -7.22636e-06 -6.2814e-07 -19.4591 24.5857 -41.3202 24.3286 1.87007e-05 4.90208e-06 -75.8071 -9.53684 -87.6014 22.2916 -9.88446e-07 4.63217e-06 -14.2898 4.84507 10.4561 12.9945 -0.242716 -4.98039 89.9809 -2.07821 -105.526 -5.34813 -1.25947e-06 -3.79883e-06 -23.9883 35.7952 -42.43 -24.3289 0.000322201 -8.65921e-06 -63.3656 -20.2656 -80.15 -22.2915 -0.000108084 -4.47941e-06 -12.362 4.94249 8.51928 -2.19248 -6.46944 -1.22533e-07 -177.457 2.25992 -23.5738 39.0811 -6.73843e-06 -1.23785e-05 -0.609883 0.176582 73.1989 40.9854 -6.48686e-06 -1.26872e-05 8.71774 -12.1342 -37.4451 11.7543 -2.30145e-07 3.05095e-06 0.490902 -0.601515 -22.2359 -2.19251 6.46944 -1.45247e-06 -167.417 8.83501 169.46 -39.0811 -0.00228153 -0.0401928 0.119082 -0.181246 26.5367 -40.9854 7.72618e-06 5.99936e-06 8.83326 -7.86449 -65.8611 -11.7543 -5.6619e-06 -5.58687e-06 -0.00165169 0.0012362 -16.5738 
+0 0 0 0 0 -0 1.24666 91.2451 -445.96 89.7333 -5.53666 1.08827 15.7357 5.1072e-06 -5.51765e-07 135.442 86.6449 -135.773 8.98455 -0.406207 -4.3199e-07 -3.04882 4.8105 -0.535979 16.3773 -1.3905e-06 -6.99897e-07 -2.09566 1.02984 -0.811003 6.45672 -1.25837e-06 -1.02172e-07 12.5819 -2.41917 -1.05434 12.9942 -0.242716 4.98039 -89.8262 -2.36338 -100.793 5.34809 -7.22636e-06 -6.2814e-07 -20.3247 22.8234 -43.7733 24.3286 1.87007e-05 4.90208e-06 -77.2797 -12.8712 -87.1218 22.2916 -9.88446e-07 4.63217e-06 -14.2029 4.86707 10.0289 12.9945 -0.242716 -4.98039 89.9523 -2.43589 -106.121 -5.34813 -1.25947e-06 -3.79883e-06 -25.5602 33.7592 -43.1227 -24.3289 0.000322201 -8.65921e-06 -64.5739 -22.8613 -79.5359 -22.2915 -0.000108084 -4.47941e-06 -12.5155 4.95282 8.30693 -2.19248 -6.46944 -1.22533e-07 -179.87 4.05562 -28.3149 39.0811 -6.73843e-06 -1.23785e-05 -0.562461 0.223095 67.6643 40.9854 -6.48686e-06 -1.26872e-05 11.2424 -16.7812 -39.784 11.7543 -2.30145e-07 3.05095e-06 0.433005 -0.523957 -21.5312 -2.19251 6.46944 -1.45247e-06 -170.912 9.70571 173.423 -39.0811 -0.00228153 -0.0401928 0.0684819 -0.116161 22.0186 -40.9854 7.72618e-06 5.99936e-06 8.27842 -6.26925 -66.0645 -11.7543 -5.6619e-06 -5.58687e-06 -0.0036831 0.00266675 -16.5739 
+0 0 0 0 0 -0 1.39856 91.9036 -442.87 91.4525 -6.0235 0.33171 15.7357 5.1072e-06 -5.51765e-07 139.76 86.5316 -140.868 8.98455 -0.406207 -4.3199e-07 -3.23842 5.39908 -2.0646 16.3773 -1.3905e-06 -6.99897e-07 -2.58245 1.09776 -0.662911 6.45672 -1.25837e-06 -1.02172e-07 12.2873 -2.68414 -0.699305 12.9942 -0.242716 4.98039 -89.7924 -2.67515 -100.561 5.34809 -7.22636e-06 -6.2814e-07 -21.15 20.9502 -45.6618 24.3286 1.87007e-05 4.90208e-06 -77.2927 -15.6094 -86.5278 22.2916 -9.88446e-07 4.63217e-06 -14.2336 4.87257 9.92146 12.9945 -0.242716 -4.98039 89.9205 -2.73302 -106.666 -5.34813 -1.25947e-06 -3.79883e-06 -26.1836 31.8358 -44.6418 -24.3289 0.000322201 -8.65921e-06 -65.8445 -25.7351 -78.9822 -22.2915 -0.000108084 -4.47941e-06 -12.9265 4.96166 8.12521 -2.19248 -6.46944 -1.22534e-07 179.112 5.54949 -31.3896 39.0811 -6.73843e-06 -1.23785e-05 -0.42697 0.256017 58.1821 40.9854 -6.48686e-06 -1.26872e-05 12.0188 -18.5941 -40.746 11.7543 -2.30145e-07 3.05095e-06 0.462022 -0.562541 -21.8827 -2.19251 6.46944 -1.45247e-06 -173.238 10.9493 177.438 -39.0811 -0.00228153 -0.0401928 0.0321904 -0.0612898 16.6742 -40.9854 7.72618e-06 5.99936e-06 8.48321 -4.93461 -65.6941 -11.7543 -5.6619e-06 -5.58687e-06 0.0119357 -0.012366 -16.6695 
+      </pre>
+
+      <p>
+        Now properly parse these two parts and you can load most BVH files. 
+        Overall, this format is relatively simple to parse since it is plain text like .obj files. 
+        Additionally braces are the only kind of grouping present and joint definitions are recursive so the parser itself ends up fairly simple.
+        Some adjustments to a standard hierarchal model setup are needed to allow any order of rotations, but the changes aren't too large.
+      </p>
+
+      <p>
+        I don't believe I'll be using this in any future work since mapping actual geometry to the models would be complex but it was a interesting exercise regardless.
+      </p>
+
+    </main>
+  </body>
+</html>
