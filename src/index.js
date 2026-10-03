@@ -14,7 +14,6 @@ const boneScene = new Scene("bonecanvas");
 scene.camera.move(0, -8, -25);
 scene.rotationX += Math.PI / 6;
 boneScene.camera.move(0, -8, -25);
-boneScene.rotationX += Math.PI / 6;
 
 scene.addShader(
   new Shader(
@@ -53,30 +52,60 @@ boneScene.addShader(
 );
 
 let skeleton;
-function changeSkeleton(id) {
+let skeletonConfig = {
+  animationPlay: true,
+  animationInterpolate: true,
+  animationSpeed: 1,
+};
+
+function changeSkeleton(id, scene) {
+  if (!!skeleton && !!skeleton.label) {
+    scene.removeObject(skeleton.label);
+  }
   skeleton = bandaiNamcoHideTail(loadBVH(id, 3, 16, rgba(0, 0, 0, 1), id));
   skeleton.scale = [0.1, 0.1, 0.1];
+  sceneAddBVH(scene, skeleton, "basic");
+
+  for (const key of Object.keys(skeletonConfig)) {
+    skeleton[key] = skeletonConfig[key];
+  }
 }
 
+function selectSkeleton(event) {
+  changeSkeleton(event.target.value, scene);
+}
 
-function initSkeletonDemo(){
+function configureSkeleton(event) {
+  skeletonConfig[event.target.name] =
+    Number(event.target.value) || event.target.checked;
+  skeleton[event.target.name] = skeletonConfig[event.target.name];
+}
 
-  const demoSkeleton = loadBVH("dance", 1, 16, rgba(0, 0, 0, 1), "dance");
+function attachInputControls() {
+  [...document.getElementsByTagName("input")].forEach((i) =>
+    i.addEventListener("input", configureSkeleton),
+  );
+  document
+    .getElementById("animationSelector")
+    .addEventListener("input", selectSkeleton);
+}
+
+function initSkeletonDemo() {
+  const demoSkeleton = loadBVH("walk", 1, 16, rgba(0, 0, 99, 1), "walkdemo");
   demoSkeleton.animationPlay = false;
   demoSkeleton.scale = [0.1, 0.1, 0.1];
   demoSkeleton.position[0] = -7;
-  
-  const demoSkeleton2 = loadBVH("dance", 1, 16, rgba(0, 99, 0, 1), "dance2");
+
+  const demoSkeleton2 = loadBVH("walk", 1, 16, rgba(0, 99, 0, 1), "walkdemo2");
   demoSkeleton2.scale = [0.1, 0.1, 0.1];
   demoSkeleton2.position[0] = 7;
-
 
   sceneAddBVH(boneScene, demoSkeleton, "basic");
   sceneAddBVH(boneScene, demoSkeleton2, "basic");
 
-  setTimeout(()=> {
+  setTimeout(() => {
     demoSkeleton2.animationPlay = false;
-  },60)
+  }, 60);
 }
 
 /**
@@ -91,9 +120,7 @@ async function main() {
   await objects.cacheBVH("./public/guide.bvh", "guide");
   await objects.cacheBVH("./public/punch.bvh", "punch");
   await objects.cacheBVH("./public/walk.bvh", "walk");
-  await objects.cacheBVH("./PotatoEngine/examples/bvh/dance.bvh", "dance");
-
-  changeSkeleton("walk");
+  await objects.cacheBVH("./public/dance.bvh", "dance");
 
   await scene.loadShaders();
   await boneScene.loadShaders();
@@ -101,9 +128,9 @@ async function main() {
   scene.addProgram("basic", "basicVertex", "basicFragment");
   boneScene.addProgram("basic", "basicVertex", "basicFragment");
 
-  initSkeletonDemo()
+  initSkeletonDemo();
+  changeSkeleton("dance", scene);
 
-  sceneAddBVH(scene, skeleton, "basic");
   scene.initBuffers();
   boneScene.initBuffers();
 
@@ -111,10 +138,12 @@ async function main() {
   Controls.BasicControls.setupKeyboardControls(scene);
   Controls.BasicControls.setupMouseControls(boneScene);
   // Controls.BasicControls.setupKeyboardControls(boneScene);
+  attachInputControls();
 
   setInterval(() => {
     scene.render();
     boneScene.render();
+    boneScene.rotationY += Math.PI / 360;
   }, 30);
 }
 
