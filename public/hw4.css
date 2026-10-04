@@ -57,6 +57,13 @@ canvas {
 
 .controls input:focus,
 .controls select:focus {
-  outline: 2px solid #3867d6;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+#controls-BVH {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
