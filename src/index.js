@@ -58,6 +58,17 @@ let skeletonConfig = {
   animationSpeed: 1,
 };
 
+/**
+ * Load a new bvh skeleton into a scene by id
+ * - delete the old skeleton root node
+ *  - need to delete all the child nodes in the future updates to the engine
+ * 
+ * - set the skeleton to a new animation and add to the scene
+ * - apply skeleton config values.
+ * 
+ * @param {*} id the id of the bvh file to load
+ * @param {*} scene the scene to add the skeleton to
+ */
 function changeSkeleton(id, scene) {
   if (!!skeleton && !!skeleton.label) {
     scene.removeObject(skeleton.label);
@@ -71,16 +82,31 @@ function changeSkeleton(id, scene) {
   }
 }
 
+/**
+ * Handler for the animation select event
+ * @param {*} event 
+ */
 function selectSkeleton(event) {
   changeSkeleton(event.target.value, scene);
 }
 
+/**
+ * Apply the changes in an input event to the skeleton
+ * and the skeleton config object
+ * 
+ * @param {*} event 
+ */
 function configureSkeleton(event) {
   skeletonConfig[event.target.name] =
     Number(event.target.value) || event.target.checked;
   skeleton[event.target.name] = skeletonConfig[event.target.name];
 }
 
+/**
+ * Attach the basic input controls to their elements
+ * - speed, interpolation, play/pause
+ * - select animation
+ */
 function attachInputControls() {
   [...document.getElementsByTagName("input")].forEach((i) =>
     i.addEventListener("input", configureSkeleton),
@@ -90,6 +116,9 @@ function attachInputControls() {
     .addEventListener("input", selectSkeleton);
 }
 
+/**
+ * Init the skeleton non animated demo scene.
+ */
 function initSkeletonDemo() {
   const demoSkeleton = loadBVH("walk", 1, 16, rgba(0, 0, 99, 1), "walkdemo");
   demoSkeleton.animationPlay = false;
