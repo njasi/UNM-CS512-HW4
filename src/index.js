@@ -73,7 +73,7 @@ function changeSkeleton(id, scene) {
   if (!!skeleton && !!skeleton.label) {
     scene.removeObject(skeleton.label);
   }
-  skeleton = bandaiNamcoHideTail(loadBVH(id, 3, 16, rgba(0, 0, 0, 1), id));
+  skeleton = bandaiNamcoHideTail(loadBVH(id, 3, 16, rgba(0, 0, 0, 1), id + "_"));
   skeleton.scale = [0.1, 0.1, 0.1];
   sceneAddBVH(scene, skeleton, "basic");
 
