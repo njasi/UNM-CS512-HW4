@@ -58,6 +58,45 @@ let skeletonConfig = {
   animationSpeed: 1,
 };
 
+let cameraSettings = {
+  default: {
+    x: 0,
+    y: -8,
+    z: -31,
+    scale: 0.1,
+  },
+  byebye: {
+    x: 0,
+    y: -31,
+    z: 7,
+    scale: 0.1,
+  },
+  guide: {
+    x: 0,
+    y: -31,
+    z: 7,
+    scale: 0.1,
+  },
+  fightsports:{
+    x: 0,
+    y: 3.5,
+    z: -40,
+    scale: 0.05,
+  },
+  pushfall:{
+    x: 0,
+    y: 3.5,
+    z: -40,
+    scale: 0.05,
+  },
+  jumps:{
+    x: 0,
+    y: 6,
+    z: -46,
+    scale: 0.05,
+  },
+};
+
 /**
  * Load a new bvh skeleton into a scene by id
  * - delete the old skeleton root node
@@ -73,8 +112,15 @@ function changeSkeleton(id, scene) {
   if (!!skeleton && !!skeleton.label) {
     scene.removeObject(skeleton.label);
   }
-  skeleton = bandaiNamcoHideTail(loadBVH(id, 3, 16, rgba(0, 0, 0, 1), id + "_"));
-  skeleton.scale = [0.1, 0.1, 0.1];
+  skeleton = bandaiNamcoHideTail(
+    loadBVH(id, 3, 16, rgba(0, 0, 0, 1), id + "_"),
+  );
+
+  const camSettings = cameraSettings[id] || cameraSettings.default;
+  scene.camera.x = camSettings.x;
+  scene.camera.y = camSettings.y;
+  scene.camera.z = camSettings.z;
+  skeleton.scale = [camSettings.scale, camSettings.scale, camSettings.scale];
   sceneAddBVH(scene, skeleton, "basic");
 
   for (const key of Object.keys(skeletonConfig)) {
@@ -228,10 +274,23 @@ function updateBVHControls() {
  * - start animation loop
  */
 async function main() {
-  await objects.cacheBVH("./public/guide.bvh", "guide");
-  await objects.cacheBVH("./public/punch.bvh", "punch");
-  await objects.cacheBVH("./public/walk.bvh", "walk");
-  await objects.cacheBVH("./public/dance.bvh", "dance");
+  const animations = [
+    "guide",
+    "punch",
+    "walk",
+    "dance",
+    "bow",
+    "bye",
+    "byebye",
+    "dash",
+    "walkback",
+    "fightsports",
+    "pushfall",
+    "jumps"
+  ];
+  Promise.all(
+    animations.map((name) => objects.cacheBVH(`./public/${name}.bvh`, name)),
+  );
 
   await scene.loadShaders();
   await boneScene.loadShaders();
@@ -256,6 +315,8 @@ async function main() {
     boneScene.render();
     boneScene.rotationY += Math.PI / 360;
     updateBVHControls();
+
+    console.log(scene.camera.x, scene.camera.y, scene.camera.z);
   }, 30);
 }
 
