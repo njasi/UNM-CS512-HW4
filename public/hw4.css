@@ -124,8 +124,7 @@ canvas {
   border: 16px solid var(--surface);
   border-top: 16px solid var(--accent);
   border-radius: 50%;
-  width: 20vw;
-  height: 20vw;
+  padding: 10%;
   animation: spin 2s linear infinite;
 }
 
