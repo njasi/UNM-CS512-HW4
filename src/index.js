@@ -284,9 +284,9 @@ function updateBVHControls() {
  */
 async function main() {
   const animations = [
-    "guide",
-    "punch",
-    "walk",
+    // "guide",
+    // "punch",
+    // "walk",
     "dance",
     // "bow",
     // "bye",
