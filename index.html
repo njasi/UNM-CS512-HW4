@@ -64,8 +64,12 @@
         rather up to date).
       </p>
       <div id="demo">
-        <div style="display: flex; justify-content: center">
+        <div
+          class="canvas-wrapper"
+          style="display: flex; justify-content: center"
+        >
           <canvas id="glcanvas" width="800" height="450"></canvas>
+          <div id="loader-wrapper"><div class="spinner"></div></div>
         </div>
 
         <div class="controls">
@@ -144,12 +148,13 @@
           >" Kobayashi et al. (2023).
         </p>
         <p>
-          A couple of the BVH files (Fight & Sports, Push & Fall, and Jumps) are from the
+          A couple of the BVH files (Fight & Sports, Push & Fall, and Jumps) are
+          from the
           <a href="https://github.com/ubisoft/ubisoft-laforge-animation-dataset"
             >Ubisoft La Forge Animation dataset</a
           >
-          which consists of data and code corresponding to the following paper: "<a
-            href="https://dl.acm.org/doi/epdf/10.1145/3386569.3392480"
+          which consists of data and code corresponding to the following paper:
+          "<a href="https://dl.acm.org/doi/epdf/10.1145/3386569.3392480"
             >Robust Motion In-betweening</a
           >" Harvey et al. (2020)
         </p>
