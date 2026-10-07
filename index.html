@@ -84,8 +84,8 @@
             <input
               name="animationSpeed"
               type="range"
-              min="0.1"
-              max="5"
+              min="-2"
+              max="10"
               step="0.1"
               value="1"
             />
@@ -102,6 +102,10 @@
               <option value="byebye">Bye Bye (Giant)</option>
               <option value="dash">Dash (Angry)</option>
               <option value="walkback">Walk Back (Sad)</option>
+              <option value="guide">Guide (Old)</option>
+              <option value="fightsports">Fight & Sports</option>
+              <option value="pushfall">Push & Fall</option>
+              <option value="jumps">Jumps</option>
             </select>
           </label>
           <details>
@@ -118,13 +122,18 @@
         </li>
         <li>Control the animation with the inputs below the frame.</li>
         <li>Try turning off interpolation at low speeds to see frame jumps.</li>
-        <li>Expand the detailed controls and watch the sliders change during animation.</li>
-        <li>Pause animation, expand the detailed controls and change some values.</li>
+        <li>
+          Expand the detailed controls and watch the sliders change during
+          animation.
+        </li>
+        <li>
+          Pause animation, expand the detailed controls and change some values.
+        </li>
       </ul>
       <article>
         <h2>Where are these animations from?</h2>
         <p>
-          The BVH files I'm using in this demo are from the open source
+          Most of the BVH files I'm using in this demo are from the open source
           <a
             href="https://github.com/BandaiNamcoResearchInc/Bandai-Namco-Research-Motiondataset"
             >Bandai-Namco-Research-Motiondataset repository on github</a
@@ -133,6 +142,16 @@
             >Motion Capture Dataset for Practical Use of AI-based Motion Editing
             and Stylization</a
           >" Kobayashi et al. (2023).
+        </p>
+        <p>
+          A couple of the BVH files (Fight & Sports, Push & Fall, and Jumps) are from the
+          <a href="https://github.com/ubisoft/ubisoft-laforge-animation-dataset"
+            >Ubisoft La Forge Animation dataset</a
+          >
+          which consists of data and code corresponding to the following paper: "<a
+            href="https://dl.acm.org/doi/epdf/10.1145/3386569.3392480"
+            >"Robust Motion In-betweening</a
+          >" Harvey et al. (2020)
         </p>
         <h2>So how do you parse BVH files?</h2>
         <p>
