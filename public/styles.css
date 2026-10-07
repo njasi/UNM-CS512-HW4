@@ -7,6 +7,8 @@
   --text: #ccc;
   --muted: #888;
   --accent: #00dd00;
+  --accent-mid: #b8dd00;
+  --accent-red: #dd4a00;
 }
 
 * {
@@ -22,7 +24,7 @@ body {
   line-height: 1.5;
 }
 
-code{
+code {
   background: var(--surface);
   color: var(--accent);
   font: 14px monospace;

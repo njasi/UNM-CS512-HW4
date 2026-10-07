@@ -297,7 +297,8 @@ async function main() {
     // "pushfall",
     // "jumps",
   ];
-  Promise.all(
+  // add the missing await lol
+  await Promise.all(
     animations.map((name) => objects.cacheBVH(`./public/${name}.bvh`, name)),
   );
 
