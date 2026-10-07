@@ -73,7 +73,9 @@ function changeSkeleton(id, scene) {
   if (!!skeleton && !!skeleton.label) {
     scene.removeObject(skeleton.label);
   }
-  skeleton = bandaiNamcoHideTail(loadBVH(id, 3, 16, rgba(0, 0, 0, 1), id + "_"));
+  skeleton = bandaiNamcoHideTail(
+    loadBVH(id, 3, 16, rgba(0, 0, 0, 1), id + "_"),
+  );
   skeleton.scale = [0.1, 0.1, 0.1];
   sceneAddBVH(scene, skeleton, "basic");
 
@@ -228,10 +230,20 @@ function updateBVHControls() {
  * - start animation loop
  */
 async function main() {
-  await objects.cacheBVH("./public/guide.bvh", "guide");
-  await objects.cacheBVH("./public/punch.bvh", "punch");
-  await objects.cacheBVH("./public/walk.bvh", "walk");
-  await objects.cacheBVH("./public/dance.bvh", "dance");
+  const animations = [
+    "guide",
+    "punch",
+    "walk",
+    "dance",
+    "bow",
+    "bye",
+    "byebye",
+    "dash",
+    "walkback"
+  ];
+  Promise.all(
+    animations.map((name) => objects.cacheBVH(`./public/${name}.bvh`, name)),
+  );
 
   await scene.loadShaders();
   await boneScene.loadShaders();
