@@ -51,10 +51,11 @@ canvas {
   appearance: none;
   -webkit-appearance: none;
   background: transparent;
+  accent-color: #666;
 }
 
 .controls #animation-speed::-webkit-slider-runnable-track {
-  height: 0.5rem;
+  /* height: 0.5rem; */
   border-radius: 1rem;
   background: linear-gradient(
     90deg,

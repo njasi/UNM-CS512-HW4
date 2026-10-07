@@ -286,7 +286,7 @@ async function main() {
   const animations = [
     // "guide",
     // "punch",
-    // "walk",
+    "walk",
     "dance",
     // "bow",
     // "bye",
