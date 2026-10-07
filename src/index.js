@@ -6,6 +6,8 @@ import {
   sceneAddBVH,
 } from "PotatoEngine/src/objects";
 
+const loaderWrapper = document.getElementById("loader-wrapper");
+
 // try to plug in new scene abstraction
 const scene = new Scene("glcanvas");
 const boneScene = new Scene("bonecanvas");
@@ -77,19 +79,19 @@ let cameraSettings = {
     z: 7,
     scale: 0.1,
   },
-  fightsports:{
+  fightsports: {
     x: 0,
     y: 3.5,
     z: -40,
     scale: 0.05,
   },
-  pushfall:{
+  pushfall: {
     x: 0,
     y: 3.5,
     z: -40,
     scale: 0.05,
   },
-  jumps:{
+  jumps: {
     x: 0,
     y: 6,
     z: -46,
@@ -108,10 +110,17 @@ let cameraSettings = {
  * @param {*} id the id of the bvh file to load
  * @param {*} scene the scene to add the skeleton to
  */
-function changeSkeleton(id, scene) {
+async function changeSkeleton(id, scene) {
   if (!!skeleton && !!skeleton.label) {
     scene.removeObject(skeleton.label);
   }
+
+  if (!objects.isCached(id)) {
+    loaderWrapper.className = "show";
+  }
+  await objects.cacheBVH(`./public/${id}.bvh`, id);
+  loaderWrapper.className = "";
+
   skeleton = bandaiNamcoHideTail(
     loadBVH(id, 3, 16, rgba(0, 0, 0, 1), id + "_"),
   );
@@ -279,14 +288,14 @@ async function main() {
     "punch",
     "walk",
     "dance",
-    "bow",
-    "bye",
-    "byebye",
-    "dash",
-    "walkback",
-    "fightsports",
-    "pushfall",
-    "jumps"
+    // "bow",
+    // "bye",
+    // "byebye",
+    // "dash",
+    // "walkback",
+    // "fightsports",
+    // "pushfall",
+    // "jumps",
   ];
   Promise.all(
     animations.map((name) => objects.cacheBVH(`./public/${name}.bvh`, name)),
@@ -314,9 +323,11 @@ async function main() {
     scene.render();
     boneScene.render();
     boneScene.rotationY += Math.PI / 360;
-    updateBVHControls();
-
-    console.log(scene.camera.x, scene.camera.y, scene.camera.z);
+    try {
+      updateBVHControls();
+    } catch (error) {
+      // silent for now lol
+    }
   }, 30);
 }
 
