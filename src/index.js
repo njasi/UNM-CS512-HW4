@@ -1,12 +1,14 @@
-import { Scene, Shader, objects, Controls } from "PotatoEngine";
+import { Scene, objects, Controls } from "PotatoEngine";
 import {
   bandaiNamcoHideTail,
   loadBVH,
-  rgba,
   sceneAddBVH,
 } from "PotatoEngine/src/objects";
+import { Shader } from "PotatoEngine/src/shaders";
+import { rgba } from "PotatoEngine/src/util/color";
 
 const loaderWrapper = document.getElementById("loader-wrapper");
+const loaderText = document.getElementById("spinner-text");
 
 // try to plug in new scene abstraction
 const scene = new Scene("glcanvas");
@@ -16,6 +18,15 @@ const boneScene = new Scene("bonecanvas");
 scene.camera.move(0, -8, -25);
 scene.rotationX += Math.PI / 6;
 boneScene.camera.move(0, -8, -25);
+
+function onProgress({ loaded, total, percent }) {
+  if (percent) {
+    loaderText.innerText = `${percent}%`;
+  } else {
+    const mb = Math.floor(loaded / 10000) / 100;
+    loaderText.innerText = `${mb} mb`;
+  }
+}
 
 scene.addShader(
   new Shader(
@@ -112,13 +123,13 @@ let cameraSettings = {
  */
 async function changeSkeleton(id, scene) {
   if (!!skeleton && !!skeleton.label) {
-    scene.removeObject(skeleton.label);
+    scene.removeObject(skeleton.label, { removeChildren: true });
   }
 
   if (!objects.isCached(id)) {
     loaderWrapper.className = "show";
   }
-  await objects.cacheBVH(`./public/${id}.bvh`, id);
+  await objects.cacheBVH(`./public/${id}.bvh`, id, onProgress);
   loaderWrapper.className = "";
 
   skeleton = bandaiNamcoHideTail(
@@ -299,7 +310,13 @@ async function main() {
   ];
   // add the missing await lol
   await Promise.all(
-    animations.map((name) => objects.cacheBVH(`./public/${name}.bvh`, name)),
+    animations.map((name) =>
+      objects.cacheBVH(
+        `./public/${name}.bvh`,
+        name,
+        name == "dance" ? onProgress : undefined,
+      ),
+    ),
   );
 
   await scene.loadShaders();

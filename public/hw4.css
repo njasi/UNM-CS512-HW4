@@ -59,9 +59,9 @@ canvas {
   border-radius: 1rem;
   background: linear-gradient(
     90deg,
-    var(--accent-red) 0% 20%,
-    var(--accent-mid) 20% 21%,
-    var(--accent) 21% 100%
+    var(--accent-red) 0% 29%,
+    var(--accent-mid) 29% 30%,
+    var(--accent) 30% 100%
   );
 }
 
@@ -70,9 +70,9 @@ canvas {
   border-radius: 1rem;
   background: linear-gradient(
     90deg,
-    var(--accent-red) 0% 20%,
-    var(--accent-mid) 20% 21%,
-    var(--accent) 21% 100%
+    var(--accent-red) 0% 29%,
+    var(--accent-mid) 29% 30%,
+    var(--accent) 30% 100%
   );
 }
 
