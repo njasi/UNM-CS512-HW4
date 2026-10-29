@@ -20,12 +20,11 @@ scene.rotationX += Math.PI / 6;
 boneScene.camera.move(0, -8, -25);
 
 function onProgress({ loaded, total, percent }) {
-  if (percent) {
-    loaderText.innerText = `${percent}%`;
-  } else {
-    const mb = Math.floor(loaded / 10000) / 100;
-    loaderText.innerText = `${mb} mb`;
-  }
+  // gh server seems to use compressed serving so percentage is invalid 
+  // (about 2-3 times higher than the real loaded amount)
+  // look into correcting it later, for now just show raw mb...
+  const mb = Math.floor(loaded / 10000) / 100;
+  loaderText.innerText = `${mb} mb`;
 }
 
 scene.addShader(
